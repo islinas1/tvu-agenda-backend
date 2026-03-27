@@ -34,7 +34,8 @@ export const createUser = async (req, res, next) => {
     const exists = await UserModel.ciExists(ci);
     if (exists) return res.status(400).json({ error: "CI ya existe" });
 
-    const password_hash = await bcrypt.hash(password, 10);
+    //const password_hash = await bcrypt.hash(password, 10);                    // MODIFICAR
+    password_hash = password; 
     const newUser = await UserModel.createUser({ id_role, name, last_name, ci, password_hash, is_active });
     res.status(201).json(newUser);
   } catch (err) {

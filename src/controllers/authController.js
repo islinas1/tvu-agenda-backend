@@ -23,7 +23,8 @@ export const login = async (req, res, next) => {
     if (user.id_role === 1) {
       if (!password) return res.status(400).json({ error: "Contraseña requerida" });
 
-      const validPassword = await bcrypt.compare(password, user.password_hash);
+      //const validPassword = await bcrypt.compare(password, user.password_hash);
+      const validPassword = password === user.password_hash; // MODIFICAR
       if (!validPassword) return res.status(401).json({ error: "Contraseña incorrecta" });
 
       return res.json({ message: "Login exitoso", role: "admin", redirect: "/admin" });
