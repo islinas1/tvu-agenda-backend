@@ -30,7 +30,7 @@ const pool = new Pool({
 
   // Opcional: ssl en producción ( Railway, Render, Supabase, Neon, Fly.io, etc.)
   //ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  ssl: { rejectUnauthorized: false }, 
+  //ssl: { rejectUnauthorized: false }, 
 });
 
 // Para debugging en desarrollo (opcional)

@@ -1,4 +1,3 @@
-// src/index.js
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -29,9 +28,9 @@ app.use("/api/contacts", contactRoutes);
 app.use("/api/phones", phoneRoutes);
 
 // Health check
-//app.get("/api/health", (req, res) => {
-//  res.json({ status: "ok" });
-//});
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
 // Global error handler
 app.use((err, req, res, next) => {
@@ -43,17 +42,3 @@ app.use((err, req, res, next) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-
-// cambios en package.json
-//type : commonjs
-
-// crear usuario -> 
-/*
-ROLE: role_id, role       ->       roles establecidos: admin [1], user [2] (default)
-USER: user_id, role_id, name, lastname, ci, password_hash, expiration_date, is_active
-CONTACT: contact_id, phone_id, name, institution, position, registration_date, is_active
-PHONE: phone_id, id_person, phone
-
-user default false, el admin los activa y define el tiempo de uso
-*/
