@@ -6,12 +6,12 @@ import {
   updateRole,
   deleteRoleController,
 } from "../controllers/roleController.js";
-// import { authMiddleware } from "../middlewares/authMiddleware.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 // Todas las rutas protegidas con auth
-//router.use(authMiddleware);
+router.use(authMiddleware);
 
 // CRUD roles
 router.get("/", getRoles);             // GET /api/roles

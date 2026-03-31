@@ -7,12 +7,12 @@ import {
  deactivatePhoneController,
  deletePhoneController,
 } from "../controllers/phoneController.js";
-//import { authMiddleware } from "../middlewares/authMiddleware.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// Todas las rutas protegidas
-//router.use(authMiddleware);
+//Todas las rutas protegidas
+router.use(authMiddleware);
 
 // CRUD teléfonos
 router.get("/", getPhones);                  // GET /api/phones

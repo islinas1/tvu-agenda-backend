@@ -1,23 +1,19 @@
 import express from "express";
 import {
- getUsers,
- getUser,
- createUser,
- updateUserController,
- deactivateUserController,
+  getUsers,
+  getUser,
+  createUser,
+  updateUserController,
+  deactivateUserController,
 } from "../controllers/userController.js";
-//import { authMiddleware } from "../middlewares/authMiddleware.js";
+import { authMiddleware, adminOnly } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// Todas las rutas protegidas
-//router.use(authMiddleware);
-
-// CRUD usuarios
-router.get("/", getUsers);             // GET /api/users
-router.get("/:id", getUser);           // GET /api/users/:id
-router.post("/", createUser);          // POST /api/users
-router.put("/:id", updateUserController); // PUT /api/users/:id
-router.patch("/deactivate/:id", deactivateUserController); // PATCH /api/users/deactivate/:id
+router.get("/", authMiddleware, adminOnly, getUsers);
+router.get("/:id", authMiddleware, adminOnly, getUser);
+router.post("/", authMiddleware, adminOnly, createUser);
+router.put("/:id", authMiddleware, adminOnly, updateUserController);
+router.patch("/deactivate/:id", authMiddleware, adminOnly, deactivateUserController);
 
 export default router;

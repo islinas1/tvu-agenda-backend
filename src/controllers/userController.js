@@ -1,7 +1,6 @@
 import * as UserModel from "../models/userModel.js";
 import bcrypt from "bcrypt";
 
-// obtener todos los usuarios
 export const getUsers = async (req, res, next) => {
   try {
     const users = await UserModel.getAllUsers();
@@ -11,7 +10,6 @@ export const getUsers = async (req, res, next) => {
   }
 };
 
-// obtener usuario por ID
 export const getUser = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -23,27 +21,26 @@ export const getUser = async (req, res, next) => {
   }
 };
 
-// crear usuario
 export const createUser = async (req, res, next) => {
   try {
     const { id_role, name, last_name, ci, password, is_active } = req.body;
     if (!id_role || !name || !last_name || !ci)
       return res.status(400).json({ error: "Todos los campos son requeridos" });
 
-    // validar CI único
     const exists = await UserModel.ciExists(ci);
     if (exists) return res.status(400).json({ error: "CI ya existe" });
 
-    //const password_hash = await bcrypt.hash(password, 10);                    // MODIFICAR
-    password_hash = password; 
-    const newUser = await UserModel.createUser({ id_role, name, last_name, ci, password_hash, is_active });
+    // Hashear la contrasena con bcrypt (si no se proporciona, usar el CI como contrasena)
+    const rawPassword = password || ci.toString();
+    const password_hash = await bcrypt.hash(rawPassword, 10);
+
+    const newUser = await UserModel.createUser({ id_role, name, last_name, ci, password_hash, is_active: is_active ?? true });
     res.status(201).json(newUser);
   } catch (err) {
     next(err);
   }
 };
 
-// actualizar usuario
 export const updateUserController = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -60,7 +57,6 @@ export const updateUserController = async (req, res, next) => {
   }
 };
 
-// desactivar usuario
 export const deactivateUserController = async (req, res, next) => {
   try {
     const { id } = req.params;
