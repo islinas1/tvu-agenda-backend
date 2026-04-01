@@ -5,15 +5,20 @@ import {
   createUser,
   updateUserController,
   deactivateUserController,
+  activateUserController,
 } from "../controllers/userController.js";
-import { authMiddleware, adminOnly } from "../middlewares/authMiddleware.js";
+import { verifyToken, authorizeRoles } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", authMiddleware, adminOnly, getUsers);
-router.get("/:id", authMiddleware, adminOnly, getUser);
-router.post("/", authMiddleware, adminOnly, createUser);
-router.put("/:id", authMiddleware, adminOnly, updateUserController);
-router.patch("/deactivate/:id", authMiddleware, adminOnly, deactivateUserController);
+router.post("/signup", createUser);
+
+// Rutas protegidas
+router.get("/", verifyToken, authorizeRoles(1), getUsers);
+router.get("/:id", verifyToken, authorizeRoles(1), getUser);
+router.post("/", verifyToken, authorizeRoles(1), createUser);
+router.put("/:id", verifyToken, authorizeRoles(1), updateUserController);
+router.patch("/deactivate/:id", verifyToken, authorizeRoles(1), deactivateUserController);
+router.patch("/activate/:id", verifyToken, authorizeRoles(1), activateUserController);
 
 export default router;

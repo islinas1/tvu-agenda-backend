@@ -6,15 +6,14 @@ import {
   deactivateContactController,
   deleteContactController,
 } from "../controllers/contactController.js";
-import { authMiddleware, adminOnly } from "../middlewares/authMiddleware.js";
- 
-const router = express.Router();
- 
-router.get("/", authMiddleware, getContacts);
+import { verifyToken, authorizeRoles } from "../middlewares/authMiddleware.js";
 
-router.post("/", authMiddleware, createContactController);
-router.put("/:id", authMiddleware, adminOnly, updateContactController);
-router.patch("/deactivate/:id", authMiddleware, adminOnly, deactivateContactController);
-router.delete("/:id", authMiddleware, adminOnly, deleteContactController);
- 
+const router = express.Router();
+
+router.get("/", verifyToken, getContacts);
+router.post("/", verifyToken, createContactController);
+router.put("/:id", verifyToken, authorizeRoles(1), updateContactController);
+router.patch("/deactivate/:id", verifyToken, authorizeRoles(1), deactivateContactController);
+router.delete("/:id", verifyToken, authorizeRoles(1), deleteContactController);
+
 export default router;

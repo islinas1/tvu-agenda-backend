@@ -25,15 +25,16 @@ export const createContactController = async (req, res, next) => {
     });
 
     if (phones && phones.length > 0) {
-      for (const phone of phones) {
-        if (phone && phone.trim() !== '') {
-          await pool.query(
-            "INSERT INTO phone (id_contact, phone) VALUES ($1, $2)",
-            [newContact.id_contact, phone.trim()]
-          );
+    for (const p of phones) {
+        const phoneNumber = typeof p === 'string' ? p : p.phone;
+        if (phoneNumber && phoneNumber.trim() !== '') {
+            await PhoneModel.createPhone({
+                id_contact: newContact.id_contact,
+                phone: phoneNumber.trim()
+            });
         }
-      }
     }
+}
 
     res.status(201).json(newContact);
   } catch (err) {

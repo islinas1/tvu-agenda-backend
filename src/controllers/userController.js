@@ -24,17 +24,21 @@ export const getUser = async (req, res, next) => {
 export const createUser = async (req, res, next) => {
   try {
     const { id_role, name, last_name, ci, password, is_active } = req.body;
-    if (!id_role || !name || !last_name || !ci)
-      return res.status(400).json({ error: "Todos los campos son requeridos" });
+    if (!name || !last_name || !ci)
+      return res.status(400).json({ error: "Nombre, apellido y CI son requeridos" });
 
     const exists = await UserModel.ciExists(ci);
     if (exists) return res.status(400).json({ error: "CI ya existe" });
 
-    // Hashear la contrasena con bcrypt (si no se proporciona, usar el CI como contrasena)
     const rawPassword = password || ci.toString();
     const password_hash = await bcrypt.hash(rawPassword, 10);
 
-    const newUser = await UserModel.createUser({ id_role, name, last_name, ci, password_hash, is_active: is_active ?? true });
+    
+    const newUser = await UserModel.createUser({
+      id_role: id_role || 2,
+      name, last_name, ci, password_hash,
+      is_active: is_active ?? false  //ppor defecto
+    });
     res.status(201).json(newUser);
   } catch (err) {
     next(err);
@@ -62,7 +66,19 @@ export const deactivateUserController = async (req, res, next) => {
     const { id } = req.params;
     const deactivatedUser = await UserModel.deactivateUser(id);
     if (!deactivatedUser) return res.status(404).json({ error: "Usuario no encontrado" });
-    res.json({ message: "Usuario desactivado correctamente", deactivatedUser });
+    res.json({ message: "Usuario desactivado", user: deactivatedUser });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+export const activateUserController = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const activatedUser = await UserModel.activateUser(id);
+    if (!activatedUser) return res.status(404).json({ error: "Usuario no encontrado" });
+    res.json({ message: "Usuario activado", user: activatedUser });
   } catch (err) {
     next(err);
   }

@@ -9,7 +9,7 @@ const generateToken = (user) => {
       ci: user.ci,
       name: user.name,
       last_name: user.last_name,
-      role: user.id_role === 1 ? "admin" : "usuario"
+      role_id: user.id_role
     },
     process.env.JWT_SECRET,
     { expiresIn: "8h" }
@@ -28,18 +28,29 @@ export const login = async (req, res, next) => {
 
     if (user.id_role === 2) {
       const token = generateToken(user);
-      return res.json({ message: "Login exitoso", role: "usuario", redirect: "/contacts", token });
+      return res.json({
+        message: "Login exitoso",
+        token,
+        user: userData,
+        role: "usuario",
+        redirect: "/contacts"
+      });
     }
 
     if (user.id_role === 1) {
-      if (!password) return res.status(400).json({ error: "Contrasena requerida" });
+      if (!password) return res.status(400).json({ error: "Contraseña requerida" });
 
       const validPassword = await bcrypt.compare(password, user.password_hash);
-      if (!validPassword) return res.status(401).json({ error: "Contrasena incorrecta" });
+      if (!validPassword) return res.status(401).json({ error: "Contraseña incorrecta" });
 
       const token = generateToken(user);
-      // CORREGIDO: redirige a /dashboard en vez de /contacts
-      return res.json({ message: "Login exitoso", role: "admin", redirect: "/dashboard", token });
+      return res.json({
+        message: "Login exitoso",
+        token,
+        user: {id_user: user.id_user, name: user.name, role_id: user.id_role},
+        role: "admin",
+        redirect: "/dashboard"
+      });
     }
 
     return res.status(403).json({ error: "Rol no autorizado" });
@@ -58,13 +69,24 @@ export const checkCI = async (req, res, next) => {
       return res.status(401).json({ error: "Usuario no encontrado o inactivo" });
     }
 
+    const userData = {
+      id_user: user.id_user,
+      name: user.name,
+      role_id: user.id_role
+    };
+
     if (user.id_role === 2) {
       const token = generateToken(user);
-      return res.json({ role: "usuario", redirect: "/contacts", token });
+      return res.json({
+        role: "usuario",
+        redirect: "/contacts",
+        token,
+        user: userData
+      });
     }
 
     if (user.id_role === 1) {
-      return res.json({ role: "admin", redirect: "/admin" });
+      return res.json({ role: "admin", redirect: "/dashboard" });
     }
 
     return res.status(403).json({ error: "Rol no autorizado" });

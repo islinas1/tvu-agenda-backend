@@ -6,18 +6,18 @@ import {
   updateRole,
   deleteRoleController,
 } from "../controllers/roleController.js";
-import { authMiddleware } from "../middlewares/authMiddleware.js";
+import { verifyToken, authorizeRoles } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
 // Todas las rutas protegidas con auth
-router.use(authMiddleware);
+router.use(verifyToken);
 
 // CRUD roles
-router.get("/", getRoles);             // GET /api/roles
-router.get("/:id", getRole);           // GET /api/roles/:id
-router.post("/", createRole);          // POST /api/roles
-router.put("/:id", updateRole);        // PUT /api/roles/:id
-router.delete("/:id", deleteRoleController); // DELETE /api/roles/:id disable
+router.get("/", authorizeRoles(1), getRoles);             // GET /api/roles
+router.get("/:id", authorizeRoles(1), getRole);           // GET /api/roles/:id
+router.post("/", authorizeRoles(1), createRole);          // POST /api/roles
+router.put("/:id", authorizeRoles(1), updateRole);        // PUT /api/roles/:id
+router.delete("/:id", authorizeRoles(1), deleteRoleController); // DELETE /api/roles/:id disable
 
 export default router;

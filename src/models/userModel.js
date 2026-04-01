@@ -1,6 +1,5 @@
 import pool from "../config/db.js";
 
-// todos los usuarios
 export const getAllUsers = async () => {
   const result = await pool.query(
     `SELECT u.id_user, u.name, u.last_name, u.ci, 
@@ -12,7 +11,6 @@ export const getAllUsers = async () => {
   return result.rows;
 };
 
-// usuario por ID
 export const getUserById = async (id_user) => {
   const result = await pool.query(
     `SELECT u.id_user, u.name, u.last_name, u.ci, 
@@ -25,16 +23,14 @@ export const getUserById = async (id_user) => {
   return result.rows[0];
 };
 
-// usuario por CI (login)
 export const getUserByCI = async (ci) => {
   const result = await pool.query(
     "SELECT * FROM users WHERE ci=$1",
-    [ci]
+    [Number(ci)]
   );
   return result.rows[0];
 };
 
-// crear usuario
 export const createUser = async ({ id_role, name, last_name, ci, password_hash, is_active }) => {
   const result = await pool.query(
     `INSERT INTO users (id_role, name, last_name, ci, password_hash, is_active)
@@ -44,7 +40,6 @@ export const createUser = async ({ id_role, name, last_name, ci, password_hash, 
   return result.rows[0];
 };
 
-// actualizar usuario
 export const updateUser = async (id_user, { id_role, name, last_name, ci, password_hash, is_active, expiration_date }) => {
   let query, values;
   if (password_hash) {
@@ -58,7 +53,6 @@ export const updateUser = async (id_user, { id_role, name, last_name, ci, passwo
   return result.rows[0];
 };
 
-// soft delete de usuario
 export const deactivateUser = async (id_user) => {
   const result = await pool.query(
     "UPDATE users SET is_active=FALSE WHERE id_user=$1 RETURNING *",
@@ -67,8 +61,15 @@ export const deactivateUser = async (id_user) => {
   return result.rows[0];
 };
 
-// validar si CI ya existe
+export const activateUser = async (id_user) => {
+  const result = await pool.query(
+    "UPDATE users SET is_active=TRUE WHERE id_user=$1 RETURNING *",
+    [id_user]
+  );
+  return result.rows[0];
+};
+
 export const ciExists = async (ci) => {
-  const result = await pool.query("SELECT * FROM users WHERE ci=$1", [ci]);
+  const result = await pool.query("SELECT * FROM users WHERE ci=$1", [Number(ci)]);
   return result.rows.length > 0;
 };
