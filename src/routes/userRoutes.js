@@ -6,14 +6,19 @@ import {
   updateUserController,
   deactivateUserController,
   activateUserController,
+  changePasswordController,
 } from "../controllers/userController.js";
 import { verifyToken, authorizeRoles } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
+// Ruta PUBLICA
 router.post("/signup", createUser);
 
-// Rutas protegidas
+
+router.patch("/change-password", verifyToken, changePasswordController);
+
+// Rutas protegidas (solo admin)
 router.get("/", verifyToken, authorizeRoles(1), getUsers);
 router.get("/:id", verifyToken, authorizeRoles(1), getUser);
 router.post("/", verifyToken, authorizeRoles(1), createUser);

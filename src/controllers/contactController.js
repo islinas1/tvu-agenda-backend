@@ -1,7 +1,7 @@
 import * as ContactModel from "../models/contactModel.js";
+import * as PhoneModel from "../models/phoneModel.js";
 import pool from "../config/db.js";
 
-// obtener todos los contactos
 export const getContacts = async (req, res, next) => {
   try {
     const contacts = await ContactModel.getAllContacts();
@@ -11,7 +11,6 @@ export const getContacts = async (req, res, next) => {
   }
 };
 
-// crear contacto 
 export const createContactController = async (req, res, next) => {
   try {
     const { contact_name, contact_institution, contact_position, description, created_by, phones } = req.body;
@@ -21,27 +20,26 @@ export const createContactController = async (req, res, next) => {
 
     const newContact = await ContactModel.createContact({
       contact_name, contact_institution, contact_position, description,
-      created_by: created_by || (req.user ? req.user.id_user : 1)
+      created_by: req.user?.id_user || created_by || 1
     });
 
     if (phones && phones.length > 0) {
-    for (const p of phones) {
+      for (const p of phones) {
         const phoneNumber = typeof p === 'string' ? p : p.phone;
         if (phoneNumber && phoneNumber.trim() !== '') {
-            await PhoneModel.createPhone({
-                id_contact: newContact.id_contact,
-                phone: phoneNumber.trim()
-            });
+          await PhoneModel.createPhone({
+            id_contact: newContact.id_contact,
+            phone: phoneNumber.trim()
+          });
         }
+      }
     }
-}
 
     res.status(201).json(newContact);
   } catch (err) {
     next(err);
   }
 };
-
 
 export const updateContactController = async (req, res, next) => {
   try {
@@ -58,12 +56,12 @@ export const updateContactController = async (req, res, next) => {
 
     if (phones) {
       await pool.query("DELETE FROM phone WHERE id_contact = $1", [id]);
-
-      for (const phone of phones) {
-        if (phone && phone.trim() !== '') {
+      for (const p of phones) {
+        const phoneNumber = typeof p === 'string' ? p : p.phone;
+        if (phoneNumber && phoneNumber.trim() !== '') {
           await pool.query(
             "INSERT INTO phone (id_contact, phone) VALUES ($1, $2)",
-            [id, phone.trim()]
+            [id, phoneNumber.trim()]
           );
         }
       }
@@ -75,7 +73,6 @@ export const updateContactController = async (req, res, next) => {
   }
 };
 
-// desactivar contacto
 export const deactivateContactController = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -87,7 +84,6 @@ export const deactivateContactController = async (req, res, next) => {
   }
 };
 
-// eliminar contacto
 export const deleteContactController = async (req, res, next) => {
   try {
     const { id } = req.params;

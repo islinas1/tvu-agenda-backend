@@ -26,30 +26,38 @@ export const login = async (req, res, next) => {
       return res.status(401).json({ error: "Usuario no encontrado o inactivo" });
     }
 
+    const userData = { id_user: user.id_user, name: user.name, role_id: user.id_role };
+
     if (user.id_role === 2) {
       const token = generateToken(user);
       return res.json({
-        message: "Login exitoso",
-        token,
-        user: userData,
-        role: "usuario",
-        redirect: "/contacts"
+        message: "Login exitoso", token, user: userData,
+        role: "usuario", redirect: "/contacts"
       });
     }
 
     if (user.id_role === 1) {
-      if (!password) return res.status(400).json({ error: "Contraseña requerida" });
+      if (!password) return res.status(400).json({ error: "contraseña requerida" });
 
       const validPassword = await bcrypt.compare(password, user.password_hash);
-      if (!validPassword) return res.status(401).json({ error: "Contraseña incorrecta" });
+      if (!validPassword) return res.status(401).json({ error: "contraseña incorrecta" });
+
+      // Calcular dias restantes para la contraseña
+      let passwordExpired = false;
+      let daysUntilExpiry = 90;
+      if (user.expiration_date) {
+        const now = new Date();
+        const expDate = new Date(user.expiration_date);
+        const diffMs = expDate.getTime() - now.getTime();
+        daysUntilExpiry = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+        passwordExpired = daysUntilExpiry <= 0;
+      }
 
       const token = generateToken(user);
       return res.json({
-        message: "Login exitoso",
-        token,
-        user: {id_user: user.id_user, name: user.name, role_id: user.id_role},
-        role: "admin",
-        redirect: "/dashboard"
+        message: "Login exitoso", token, user: userData,
+        role: "admin", redirect: "/dashboard",
+        passwordExpired, daysUntilExpiry
       });
     }
 
@@ -69,20 +77,11 @@ export const checkCI = async (req, res, next) => {
       return res.status(401).json({ error: "Usuario no encontrado o inactivo" });
     }
 
-    const userData = {
-      id_user: user.id_user,
-      name: user.name,
-      role_id: user.id_role
-    };
+    const userData = { id_user: user.id_user, name: user.name, role_id: user.id_role };
 
     if (user.id_role === 2) {
       const token = generateToken(user);
-      return res.json({
-        role: "usuario",
-        redirect: "/contacts",
-        token,
-        user: userData
-      });
+      return res.json({ role: "usuario", redirect: "/contacts", token, user: userData });
     }
 
     if (user.id_role === 1) {

@@ -23,6 +23,15 @@ export const getUserById = async (id_user) => {
   return result.rows[0];
 };
 
+// Obtener usuario con password_hash (para cambio de contraseña)
+export const getUserByIdRaw = async (id_user) => {
+  const result = await pool.query(
+    "SELECT * FROM users WHERE id_user=$1",
+    [id_user]
+  );
+  return result.rows[0];
+};
+
 export const getUserByCI = async (ci) => {
   const result = await pool.query(
     "SELECT * FROM users WHERE ci=$1",
@@ -50,6 +59,15 @@ export const updateUser = async (id_user, { id_role, name, last_name, ci, passwo
     values = [id_role, name, last_name, ci, is_active, expiration_date, id_user];
   }
   const result = await pool.query(query, values);
+  return result.rows[0];
+};
+
+// Cambiar contraseña y poner expiracion a 90 dias
+export const changePassword = async (id_user, newPasswordHash) => {
+  const result = await pool.query(
+    `UPDATE users SET password_hash=$1, expiration_date=NOW() + INTERVAL '90 days' WHERE id_user=$2 RETURNING *`,
+    [newPasswordHash, id_user]
+  );
   return result.rows[0];
 };
 
